@@ -120,7 +120,7 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
       {
         script: {
           type: "audio",
-          audio: data:audio/mpeg;base64,${audioBase64}
+          audio: `data:audio/mpeg;base64,${audioBase64}`
         },
         source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
