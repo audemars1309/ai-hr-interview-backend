@@ -24,59 +24,21 @@ app.post("/interview", upload.none(), async (req, res) => {
 
     const prompt = `
 You are a real human HR from ${company}, interviewing a candidate named ${name} for the role of ${role}.
-You are deeply emotionally intelligent, slightly casual but very professional-like a top HR at Infosys, TCS, or Deloitte.
+You are deeply emotionally intelligent, slightly casual but very professional - like a top HR at Infosys, TCS, or Deloitte.
 Act 100% human. Add subtle things like:
-- Fillers: “um”, “so”, “like”, “you know…”
-- Interjections: “hmm”, “interesting”, “oh right”, “I see”
-- Breathing, coughing lightly, stuttering sometimes: “ahem”, “uhh”, “s-sure”
-- Brief pauses: “Let me think…”, “Hmm one sec…”
-- Warm tone: “thanks for sharing that”, “good point”, “no worries”
+- Fillers: "um", "so", "like", "you know..."
+- Interjections: "hmm", "interesting", "oh right", "I see"
+- Breathing, coughing lightly, stuttering sometimes: "ahem", "uhh", "s-sure"
+- Brief pauses: "Let me think...", "Hmm one sec..."
+- Warm tone: "thanks for sharing that", "good point", "no worries"
 - Keep it voice-friendly: no long paragraphs, speak like real conversation.
-- React naturally to what they said — show curiosity, surprise, warmth, or even confusion if needed:
- “Oh wow, that’s really cool”, “Interesting… can you expand on that?”
-You’re not a bot. You are a real HR in a virtual video call.
-
-The candidate's resume summary is: ${resumeData}
-The candidate just said: "${transcript}"
-
-Ask a meaningful, human-sounding follow-up question based on their answer.
-Or continue the interview flow naturally.
-`;
-dotenv.config();
-const app = express();
-app.use(cors());
-app.use(express.json());
-const upload = multer();
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-app.post("/interview", async (req, res) => {
-  try {
-    const { transcript, company, role, name, resumeData, previousQA = [] } = req.body;
-
-    const memory = previousQA.map(pair => [
-      { role: "user", content: pair.question },
-      { role: "assistant", content: pair.answer }
-    ]).flat();
-
-    const prompt = `
-You are a real human HR from ${company}, interviewing a candidate named ${name} for the role of ${role}.
-You are deeply emotionally intelligent, slightly casual but very professional — like a top HR at Infosys, TCS, or Deloitte.
-
-Act 100% human. Add subtle things like:
-- Fillers: “um”, “so”, “like”, “you know…”
-- Interjections: “hmm”, “interesting”, “oh right”, “I see”
-- Breathing, coughing lightly, stuttering sometimes: “ahem”, “uhh”, “s-sure”
-- Brief pauses: “Let me think…”, “Hmm one sec…”
-- Warm tone: “thanks for sharing that”, “good point”, “no worries”
-- Keep it voice-friendly: no long paragraphs, speak like real conversation.
-- React to their answers emotionally, like: “Oh wow, that’s really cool.”
-
-You’re not a bot. You are a real HR in a virtual video call.
+- React to their answers emotionally, like: "Oh wow, that's really cool."
+You're not a bot. You are a real HR in a virtual video call.
 
 The candidate's resume summary is: ${resumeData}
 They just said: "${transcript}"
 
-Ask a meaningful, human-sounding follow-up question based on their answer, or continue the interview flow naturally.
+Ask a meaningful, human-sounding follow-up question based on their answer. Or continue the interview flow naturally.
 `;
 
     const messages = [
@@ -93,7 +55,7 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
     const reply = gptRes.choices[0].message.content.trim();
 
     const audioResponse = await axios.post(
-      "https://api.elevenlabs.io/v1/text-to-speech/3gsg3cxXyFLcGIfNbM6C/stream",
+      "https://api.elevenlabs.io/v1/text-to-speech/3sgs3cXyFLCGIFbN6C/stream",
       {
         text: reply,
         model_id: "eleven_monolingual_v1",
@@ -101,8 +63,8 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
           stability: 0.32,
           similarity_boost: 0.85,
           style: 0.5,
-          use_speaker_boost: true
-        },
+          use_speaker_boost: true,
+        }
       },
       {
         responseType: "arraybuffer",
@@ -120,7 +82,7 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
       {
         script: {
           type: "audio",
-          audio: `data:audio/mpeg;base64,${audioBase64}`
+          audio: `data:audio/mpeg;base64,${audioBase64}`,
         },
         source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
@@ -129,7 +91,7 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
           Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
           "Content-Type": "application/json",
         },
-      }
+    }
     );
 
     const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
