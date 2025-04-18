@@ -22,8 +22,8 @@ app.post("/interview", upload.none(), async (req, res) => {
       { role: "assistant", content: pair.answer }
     ]).flat();
 
-    const prompt = \`
-You are a real human HR from \${company}, interviewing a candidate named \${name} for the role of \${role}.
+    const prompt = `
+You are a real human HR from ${company}, interviewing a candidate named ${name} for the role of ${role}.
 You are deeply emotionally intelligent, slightly casual but very professional — like a top HR at Infosys, TCS, or Deloitte.
 
 Act 100% human. Add subtle things like:
@@ -37,11 +37,11 @@ Act 100% human. Add subtle things like:
 
 You’re not a bot. You are a real HR in a virtual video call.
 
-The candidate's resume summary is: \${resumeData}
-They just said: "\${transcript}"
+The candidate's resume summary is: ${resumeData}
+They just said: "${transcript}"
 
 Ask a meaningful, human-sounding follow-up question based on their answer, or continue the interview flow naturally.
-\`;
+`;
 
     const messages = [
       { role: "system", content: prompt },
@@ -84,19 +84,19 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
       {
         script: {
           type: "audio",
-          audio: \data:audio/mpeg;base64,\${audioBase64}\
+          audio: data:audio/mpeg;base64,${audioBase64}
         },
         source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
       {
         headers: {
-          Authorization: \Bearer \${process.env.D_ID_API_KEY}\,
+          Authorization: Bearer ${process.env.D_ID_API_KEY},
           "Content-Type": "application/json",
         },
       }
     );
 
-    const videoUrl = \https://studio.d-id.com/talks/\${didRes.data.id}\;
+    const videoUrl = https://studio.d-id.com/talks/${didRes.data.id};
     res.json({ reply, videoUrl });
 
   } catch (err) {
@@ -109,7 +109,5 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
   }
 });
 
-app.get("/", (req, res) => res.send("Upgraded AI HR Backend is running"));
-
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(\Server running on port \${PORT}\));
+app.listen(PORT, () => console.log(AI HR backend is running on port ${PORT}));
