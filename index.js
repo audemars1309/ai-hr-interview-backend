@@ -146,4 +146,6 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`AI HR backend is running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`AI HR backend is running on port ${PORT}`);
+});
