@@ -1,4 +1,4 @@
-import express from "express";
+[11:50 pm, 18/4/2025] Dharun Raj Gupta: import express from "express";
 import multer from "multer";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -14,6 +14,42 @@ const upload = multer();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.post("/interview", upload.none(), async (req, res) => {
+  try {
+    const { transcript, company, role, name, resumeData, previousQA = [] } = req.body;
+
+    const memory = previousQA.map(pair => [
+      { role: "user", content: pair.question },
+      { role: "assistant", content: pair.answer }
+    ]).flat();
+
+    const prompt = `
+You are a real human HR from ${company}, interviewing a candidate named ${name} for the role of ${role}.
+You are deeply emotionally intelligent, slightly casual but very professional-like a top HR at Infosys, TCS, or Deloitte.
+Act 100% human. Add subtle things like:
+- Fillers: “um”, “so”, “like”, “you know…”
+- Interjections: “hmm”, “interesting”, “oh right”, “I see”
+- Breathing, coughing lightly, stuttering sometimes: “ahem”, “uhh”, “s-sure”
+- Brief pauses: “Let me think…”, “Hmm one sec…”
+- Warm tone: “thanks for sharing that”, “good point”, “no worries”
+- Keep it voice-friendly: no long paragraphs, speak like real conversation.
+- React naturally to what they said — show curiosity, surprise, warmth, or even confusion if needed:
+ “Oh wow, that’s really cool”, “Interesting… can you expand on that?”
+You’re not a bot. You are a real HR in a virtual video call.
+
+The candidate's resume summary is: ${resumeData}
+The candidate just said: "${transcript}"
+
+Ask a meaningful, human-sounding follow-up question based on their answer.
+Or continue the interview flow naturally.
+`;
+dotenv.config();
+const app = express();
+app.use(cors());
+app.use(express.json());
+const upload = multer();
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+app.post("/interview", async (req, res) => {
   try {
     const { transcript, company, role, name, resumeData, previousQA = [] } = req.body;
 
@@ -90,13 +126,13 @@ Ask a meaningful, human-sounding follow-up question based on their answer, or co
       },
       {
         headers: {
-          Authorization: Bearer ${process.env.D_ID_API_KEY},
+          Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
     );
 
-    const videoUrl = https://studio.d-id.com/talks/${didRes.data.id};
+    const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
     res.json({ reply, videoUrl });
 
   } catch (err) {
