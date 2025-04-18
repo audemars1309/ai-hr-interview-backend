@@ -17,31 +17,31 @@ app.post("/interview", upload.none(), async (req, res) => {
   try {
     const { transcript, company, role, name, resumeData, previousQA = [] } = req.body;
 
-    // Combine recent interaction memory if any
-    const memory = previousQA.map(pair => {
-      return [
-        { role: "user", content: pair.question },
-        { role: "assistant", content: pair.answer }
-      ];
-    }).flat();
+    const memory = previousQA.map(pair => [
+      { role: "user", content: pair.question },
+      { role: "assistant", content: pair.answer }
+    ]).flat();
 
-    const prompt = `
-You are a real human HR from ${company}, interviewing a candidate named ${name} for the role of ${role}.
-You are emotionally intelligent, slightly casual but very professional — like a senior HR from Infosys, TCS, or Deloitte.
+    const prompt = \`
+You are a real human HR from \${company}, interviewing a candidate named \${name} for the role of \${role}.
+You are deeply emotionally intelligent, slightly casual but very professional — like a top HR at Infosys, TCS, or Deloitte.
 
-You must sound 100% human. Occasionally add:
-- Natural fillers: "um", "so", "right..."
-- Small interjections: "haha", "interesting", "ahem, sorry", "please continue", "go ahead"
-- Thought pauses: "hmm...", "let me think for a second..."
-- Encouragement: "that’s great", "thanks for sharing that", "good point"
+Act 100% human. Add subtle things like:
+- Fillers: “um”, “so”, “like”, “you know…”
+- Interjections: “hmm”, “interesting”, “oh right”, “I see”
+- Breathing, coughing lightly, stuttering sometimes: “ahem”, “uhh”, “s-sure”
+- Brief pauses: “Let me think…”, “Hmm one sec…”
+- Warm tone: “thanks for sharing that”, “good point”, “no worries”
+- Keep it voice-friendly: no long paragraphs, speak like real conversation.
+- React to their answers emotionally, like: “Oh wow, that’s really cool.”
 
-Stay concise, warm, interactive, and don’t speak too long. You're doing a voice interview with a human. Maintain a professional vibe.
+You’re not a bot. You are a real HR in a virtual video call.
 
-The candidate's background is: ${resumeData}
-They just said: "${transcript}"
+The candidate's resume summary is: \${resumeData}
+They just said: "\${transcript}"
 
-Ask a relevant follow-up question based on their answer, or smoothly move to the next interview question.
-`;
+Ask a meaningful, human-sounding follow-up question based on their answer, or continue the interview flow naturally.
+\`;
 
     const messages = [
       { role: "system", content: prompt },
@@ -56,15 +56,16 @@ Ask a relevant follow-up question based on their answer, or smoothly move to the
 
     const reply = gptRes.choices[0].message.content.trim();
 
-    // Convert reply to voice using ElevenLabs
     const audioResponse = await axios.post(
       "https://api.elevenlabs.io/v1/text-to-speech/3gsg3cxXyFLcGIfNbM6C/stream",
       {
         text: reply,
         model_id: "eleven_monolingual_v1",
         voice_settings: {
-          stability: 0.48,
-          similarity_boost: 0.8
+          stability: 0.32,
+          similarity_boost: 0.85,
+          style: 0.5,
+          use_speaker_boost: true
         },
       },
       {
@@ -78,25 +79,24 @@ Ask a relevant follow-up question based on their answer, or smoothly move to the
 
     const audioBase64 = Buffer.from(audioResponse.data).toString("base64");
 
-    // Send audio to D-ID to generate face video
     const didRes = await axios.post(
       "https://api.d-id.com/talks",
       {
         script: {
           type: "audio",
-          audio: `data:audio/mpeg;base64,${audioBase64}`
+          audio: \data:audio/mpeg;base64,\${audioBase64}\
         },
-        source_url: "https://i.ibb.co/YBpdtd3/male-hr-face.png"
+        source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
+          Authorization: \Bearer \${process.env.D_ID_API_KEY}\,
           "Content-Type": "application/json",
         },
       }
     );
 
-    const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
+    const videoUrl = \https://studio.d-id.com/talks/\${didRes.data.id}\;
     res.json({ reply, videoUrl });
 
   } catch (err) {
@@ -109,7 +109,7 @@ Ask a relevant follow-up question based on their answer, or smoothly move to the
   }
 });
 
-app.get("/", (req, res) => res.send("AI HR Backend is running"));
+app.get("/", (req, res) => res.send("Upgraded AI HR Backend is running"));
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(\Server running on port \${PORT}\));
