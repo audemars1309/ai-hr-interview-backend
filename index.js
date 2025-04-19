@@ -112,7 +112,7 @@ if (!contentType || !contentType.includes("audio")) {
 
   } catch (err) {
     if (err.response && err.response.data) {
-      console.error("API Error Response:", err.response.data);
+      console.error("ElevenLabs API Error:", JSON.stringify(err.response.data, null, 2));
       res.status(500).json({ error: err.response.data });
     } else {
       console.error("Server Error:", err.message);
