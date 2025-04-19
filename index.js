@@ -122,12 +122,12 @@ if (!contentType || !contentType.includes("audio")) {
 
   } catch (err) {
     if (err.response && err.response.data) {
-      console.error("Full ElevenLabs Error Response:", JSON.stringify(err.response.data, null, 2));
-      console.error("ElevenLabs API Error:", JSON.stringify(err.response.data, null, 2));
-      res.status(500).json({ error: JSON.stringify(err.response.data, null, 2) });
+      const detailedError = JSON.stringify(err.response.data, null, 2);
+      console.error("ElevenLabs Full Error Response:\n", detailedError);
+      return res.status(500).json({ error: detailedError});
     } else {
       console.error("Server Error:", err.message);
-      res.status(500).json({ error: "Server error occurred." });
+      return res.status(500).json({ error: "Server error occured."});
     }
   }
 });
