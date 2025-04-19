@@ -55,10 +55,10 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
     const reply = gptRes.choices[0].message.content.trim();
 
     const audioResponse = await axios.post(
-  "https://api.elevenlabs.io/v1/text-to-speech/3sgs3cXyFLCGIFbN6C/stream",
+  "https://api.elevenlabs.io/v1/text-to-speech/zT03pEAEi0VHKciJODfn/stream",
   {
     text: reply,
-    model_id: "eleven_monolingual_v1",
+    model_id: "eleven_multilingual_v2",
     voice_settings: {
       stability: 0.32,
       similarity_boost: 0.85,
@@ -86,21 +86,31 @@ if (!contentType || !contentType.includes("audio")) {
     const audioBase64 = Buffer.from(audioResponse.data).toString("base64");
 
     const didRes = await axios.post(
-      "https://api.d-id.com/talks",
-      {
-        script: {
-          type: "audio",
-          audio: `data:audio/mpeg;base64,${audioBase64}`,
-        },
-        source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
+  "https://api.d-id.com/talks",
+  {
+    script: {
+      type: "audio",
+      audio: `data:audio/mpeg;base64,${audioBase64}`,
+    },
+    source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg", // or your own image
+    config: {
+      align_driver: true,
+      driver_expressions: {
+        expressions: [
+          { type: "smile", intensity: 0.6 },
+          { type: "blink", intensity: 0.9 }
+        ]
       },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      result_format: "mp4"
+    }
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+  }
+);
 
     if (!didRes.data || !didRes.data.id) {
       console.error("D-ID API Error:", didRes.data);
