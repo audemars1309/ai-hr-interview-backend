@@ -125,29 +125,29 @@ if (!contentType || !contentType.includes("audio")) {
   if (err.response && err.response.data) {
     console.error("=== ElevenLabs API Error ===");
 
-    // Log entire response data clearly
+    // Log entire error response clearly
     try {
       console.error(JSON.stringify(err.response.data, null, 2));
     } catch (jsonErr) {
       console.error("Could not stringify error:", err.response.data);
     }
 
-    // Log each key separately for safety
+    // Log each key separately
     Object.entries(err.response.data).forEach(([key, value]) => {
-      console.error(`${key}:`, value);
+      console.error(`${key}:, value`);
     });
 
     // Return formatted error to frontend
     return res.status(500).json({
       error: JSON.stringify(err.response.data, null, 2),
-      message: err.response.data.message || "ElevenLabs API error occurred."
+      message: err.response.data?.message || "ElevenLabs API error occurred."
     });
   } else {
     // Handle general server errors
     console.error("=== General Server Error ===", err.message);
     return res.status(500).json({
-      error: err.message?.toString() || JSON.stringify(err) || "Server error occurred."
-    }
+      error: err.message?.toString() || "Server error occurred."
+    });
   }
 });
 
