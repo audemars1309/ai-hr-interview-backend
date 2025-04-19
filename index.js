@@ -82,32 +82,38 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
       {
         script: {
           type: "audio",
-          audio: `data:audio/mpeg;base64,${audioBase64}`,
+          audio: data:audio/mpeg;base64,${audioBase64},
         },
         source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
+          Authorization: Bearer ${process.env.D_ID_API_KEY},
           "Content-Type": "application/json",
         },
-    }
+      }
     );
 
-    const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
+    if (!didRes.data || !didRes.data.id) {
+      console.error("D-ID API Error:", didRes.data);
+      return res.status(500).json({ error: "D-ID API returned an invalid response." });
+    }
+
+    const videoUrl = https://studio.d-id.com/talks/${didRes.data.id};
     res.json({ reply, videoUrl });
 
   } catch (err) {
-    if (err.response) {
+    if (err.response && err.response.data) {
       console.error("API Error Response:", err.response.data);
+      res.status(500).json({ error: err.response.data });
     } else {
       console.error("Server Error:", err.message);
+      res.status(500).json({ error: "Server error occurred." });
     }
-    res.status(500).send("Interview system encountered an error. Please try again.");
   }
 });
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`AI HR backend is running on port ${PORT}`);
+  console.log(AI HR backend is running on port ${PORT});
 });
