@@ -120,7 +120,7 @@ if (!contentType || !contentType.includes("audio")) {
     const videoUrl = didRes.data.result_url;
     res.json({ reply, videoUrl });
 
-  } catch (err) {
+  }catch (err) {
   // Check if the error is from the API (like ElevenLabs)
   if (err.response && err.response.data) {
     console.error("=== ElevenLabs API Error ===");
@@ -137,16 +137,16 @@ if (!contentType || !contentType.includes("audio")) {
       console.error(`${key}:`, value);
     });
 
+    // Return formatted error to frontend
     return res.status(500).json({
-      error: err.response.data,
+      error: JSON.stringify(err.response.data, null, 2),
       message: err.response.data.message || "ElevenLabs API error occurred."
     });
-  }
-
-  // Handle general errors
-  console.error("=== General Server Error ===", err.message);
-  return res.status(500).json({
-    error: err.message?.toString() || "Server error occurred."
+  } else {
+    // Handle general server errors
+    console.error("=== General Server Error ===", err.message);
+    return res.status(500).json({
+      error: err.message?.toString() || JSON.stringify(err) || "Server error occurred."
     }
   }
 });
