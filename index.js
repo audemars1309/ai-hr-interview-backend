@@ -117,7 +117,7 @@ if (!contentType || !contentType.includes("audio")) {
       return res.status(500).json({ error: "D-ID API returned an invalid response." });
     }
 
-    const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
+    const videoUrl = didRes.data.result_url;
     res.json({ reply, videoUrl });
 
   } catch (err) {
