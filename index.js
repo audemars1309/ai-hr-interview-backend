@@ -121,24 +121,32 @@ if (!contentType || !contentType.includes("audio")) {
     res.json({ reply, videoUrl });
 
   } catch (err) {
+  // Check if the error is from the API (like ElevenLabs)
   if (err.response && err.response.data) {
-    const detailedError = JSON.stringify(err.response.data, null, 2);
-    
-    console.error("ElevenLabs API Full Error Response:");
-    console.error(detailedError);
+    console.error("=== ElevenLabs API Error ===");
 
-    // Also log each key inside the error object
+    // Log entire response data clearly
+    try {
+      console.error(JSON.stringify(err.response.data, null, 2));
+    } catch (jsonErr) {
+      console.error("Could not stringify error:", err.response.data);
+    }
+
+    // Log each key separately for safety
     Object.entries(err.response.data).forEach(([key, value]) => {
-      console.error(`${key}: ${JSON.stringify(value, null, 2)}`);
+      console.error(`${key}:`, value);
     });
 
     return res.status(500).json({
       error: err.response.data,
       message: err.response.data.message || "ElevenLabs API error occurred."
     });
-  } else {
-    console.error("General Server Error:", err.message);
-    return res.status(500).json({ error: err.message?.toString() || "Server error occured."});
+  }
+
+  // Handle general errors
+  console.error("=== General Server Error ===", err.message);
+  return res.status(500).json({
+    error: err.message?.toString() || "Server error occurred."
     }
   }
 });
