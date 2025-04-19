@@ -51,8 +51,8 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
       model: "gpt-4o",
       messages,
     });
-
-    const reply = gptRes.choices[0].message.content.trim();
+    console.log("GPT Response:", JSON.stringify(gptRes, null, 2));
+    const reply = gptRes?.choices?.[0]?.message?.content?.trim() || "Sorry, something went wrong with the API reply.";
 
     const audioResponse = await axios.post(
   "https://api.elevenlabs.io/v1/text-to-speech/zT03pEAEi0VHKciJODfn/stream",
