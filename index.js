@@ -82,13 +82,13 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
       {
         script: {
           type: "audio",
-          audio: data:audio/mpeg;base64,${audioBase64},
+          audio: `data:audio/mpeg;base64,${audioBase64}`,
         },
         source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
       {
         headers: {
-          Authorization: Bearer ${process.env.D_ID_API_KEY},
+          Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
@@ -99,7 +99,7 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
       return res.status(500).json({ error: "D-ID API returned an invalid response." });
     }
 
-    const videoUrl = https://studio.d-id.com/talks/${didRes.data.id};
+    const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
     res.json({ reply, videoUrl });
 
   } catch (err) {
@@ -115,5 +115,5 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(AI HR backend is running on port ${PORT});
+  console.log(`AI HR backend is running on port ${PORT}`);
 });
