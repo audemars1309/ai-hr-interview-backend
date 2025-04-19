@@ -55,25 +55,33 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
     const reply = gptRes.choices[0].message.content.trim();
 
     const audioResponse = await axios.post(
-      "https://api.elevenlabs.io/v1/text-to-speech/3sgs3cXyFLCGIFbN6C/stream",
-      {
-        text: reply,
-        model_id: "eleven_monolingual_v1",
-        voice_settings: {
-          stability: 0.32,
-          similarity_boost: 0.85,
-          style: 0.5,
-          use_speaker_boost: true,
-        }
-      },
-      {
-        responseType: "arraybuffer",
-        headers: {
-          "xi-api-key": process.env.ELEVENLABS_API_KEY,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  "https://api.elevenlabs.io/v1/text-to-speech/3sgs3cXyFLCGIFbN6C/stream",
+  {
+    text: reply,
+    model_id: "eleven_monolingual_v1",
+    voice_settings: {
+      stability: 0.32,
+      similarity_boost: 0.85,
+      style: 0.5,
+      use_speaker_boost: true,
+    }
+  },
+  {
+    responseType: "arraybuffer",
+    validateStatus: () => true, // capture all responses including errors
+    headers: {
+      "xi-api-key": process.env.ELEVENLABS_API_KEY,
+      "Content-Type": "application/json",
+    },
+  }
+);
+
+// Check if response is audio or error JSON
+const contentType = audioResponse.headers["content-type"];
+if (!contentType || !contentType.includes("audio")) {
+  const errorJson = JSON.parse(Buffer.from(audioResponse.data).toString("utf8"));
+  throw new Error("ElevenLabs Error: " + (errorJson?.detail || JSON.stringify(errorJson)));
+}
 
     const audioBase64 = Buffer.from(audioResponse.data).toString("base64");
 
