@@ -121,13 +121,21 @@ if (!contentType || !contentType.includes("audio")) {
     res.json({ reply, videoUrl });
 
   } catch (err) {
-    if (err.response && err.response.data) {
-      const detailedError = JSON.stringify(err.response.data, null, 2);
-      console.error("ElevenLabs Full Error Response:\n", detailedError);
-      return res.status(500).json({ error: detailedError});
-    } else {
-      console.error("Server Error:", err.message);
-      return res.status(500).json({ error: "Server error occured."});
+  if (err.response && err.response.data) {
+    console.error("ElevenLabs Full Error Response:", err.response.data);
+
+    // Log keys inside the object to help debug
+    Object.entries(err.response.data).forEach(([key, value]) => {
+      console.error(`${key}: ${JSON.stringify(value, null, 2)}`);
+    });
+
+    return res.status(500).json({
+      error: err.response.data,
+      message: err.response.data.message || "ElevenLabs API error occurred.",
+    });
+  } else {
+    console.error("General Server Error:", err.message);
+    return res.status(500).json({ error: "Server error occurred." });
     }
   }
 });
