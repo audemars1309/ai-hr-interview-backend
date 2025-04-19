@@ -149,7 +149,6 @@ if (!contentType || !contentType.includes("audio")) {
       error: err.message?.toString() || "Server error occurred."
     });
   }
-});
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
