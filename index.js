@@ -134,11 +134,11 @@ if (!contentType || !contentType.includes("audio")) {
 
     return res.status(500).json({
       error: err.response.data,
-      message: err.response.data?.message || "ElevenLabs API error occurred."
+      message: err.response.data.message || "ElevenLabs API error occurred."
     });
   } else {
     console.error("General Server Error:", err.message);
-    return res.status(500).json({ error: err.message || "Server error occurred." });
+    return res.status(500).json({ error: err.message?.toString() || "Server error occured."});
     }
   }
 });
