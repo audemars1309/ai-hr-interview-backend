@@ -56,10 +56,9 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
     console.log("Reply to be sent to ElevenLabs:", reply);
 
     const audioResponse = await axios.post(
-      "https://api.elevenlabs.io/v1/text-to-speech/zT03pEAEi0VHKciJODfn/stream",
+      "https://api.elevenlabs.io/v1/text-to-speech/SV61h9yhBg4i91KIBwdz/stream?model_id=eleven_multilingual_v2",
       {
         text: reply,
-        model_id: "eleven_multilingual_v2",
         voice_settings: {
           stability: 0.32,
           similarity_boost: 0.85,
