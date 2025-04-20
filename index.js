@@ -51,104 +51,68 @@ Ask a meaningful, human-sounding follow-up question based on their answer. Or co
       model: "gpt-4o",
       messages,
     });
-    console.log("GPT Response:", JSON.stringify(gptRes, null, 2));
-    const reply = gptRes?.choices?.[0]?.message?.content?.trim() || "Sorry, something went wrong with the API reply.";
+
+    const reply = gptRes.choices[0].message.content.trim();
+    console.log("Reply to be sent to ElevenLabs:", reply);
 
     const audioResponse = await axios.post(
-  "https://api.elevenlabs.io/v1/text-to-speech/zT03pEAEi0VHKciJODfn/stream",
-  {
-    text: reply,
-    model_id: "eleven_multilingual_v2",
-    voice_settings: {
-      stability: 0.32,
-      similarity_boost: 0.85,
-      style: 0.5,
-      use_speaker_boost: true,
-    }
-  },
-  {
-    responseType: "arraybuffer",
-    validateStatus: () => true, // capture all responses including errors
-    headers: {
-      "xi-api-key": process.env.ELEVENLABS_API_KEY,
-      "Content-Type": "application/json",
-    },
-  }
-);
-
-// Check if response is audio or error JSON
-const contentType = audioResponse.headers["content-type"];
-if (!contentType || !contentType.includes("audio")) {
-  const errorJson = JSON.parse(Buffer.from(audioResponse.data).toString("utf8"));
-  throw new Error("ElevenLabs Error: " + (errorJson?.detail || JSON.stringify(errorJson)));
-}
+      "https://api.elevenlabs.io/v1/text-to-speech/zT03pEAEi0VHKciJODfn/stream",
+      {
+        text: reply,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.32,
+          similarity_boost: 0.85,
+          style: 0.5,
+          use_speaker_boost: true,
+        }
+      },
+      {
+        responseType: "arraybuffer",
+        headers: {
+          "xi-api-key": process.env.ELEVENLABS_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const audioBase64 = Buffer.from(audioResponse.data).toString("base64");
 
     const didRes = await axios.post(
-  "https://api.d-id.com/talks",
-  {
-    script: {
-      type: "audio",
-      audio: `data:audio/mpeg;base64,${audioBase64}`,
-    },
-    source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg", // or your own image
-    config: {
-      align_driver: true,
-      driver_expressions: {
-        expressions: [
-          { type: "smile", intensity: 0.6 },
-          { type: "blink", intensity: 0.9 }
-        ]
+      "https://api.d-id.com/talks",
+      {
+        script: {
+          type: "audio",
+          audio: `data:audio/mpeg;base64,${audioBase64}`,
+        },
+        source_url: "https://i.postimg.cc/Z5cpsXyH/male-hr-jpg.jpg"
       },
-      result_format: "mp4"
-    }
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-  }
-);
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.D_ID_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!didRes.data || !didRes.data.id) {
       console.error("D-ID API Error:", didRes.data);
       return res.status(500).json({ error: "D-ID API returned an invalid response." });
     }
 
-    const videoUrl = didRes.data.result_url;
+    const videoUrl = `https://studio.d-id.com/talks/${didRes.data.id}`;
     res.json({ reply, videoUrl });
 
-  }catch (err) {
-  // Check if the error is from the API (like ElevenLabs)
-  if (err.response && err.response.data) {
-    console.error("=== ElevenLabs API Error ===");
-
-    // Log entire error response clearly
-    try {
-      console.error(JSON.stringify(err.response.data, null, 2));
-    } catch (jsonErr) {
-      console.error("Could not stringify error:", err.response.data);
+  } catch (err) {
+    if (err.response && err.response.data) {
+      console.error("API Error Response:", err.response.data);
+      res.status(500).json({ error: err.response.data });
+    } else {
+      console.error("Server Error:", err.message);
+      res.status(500).json({ error: "Server error occurred." });
     }
-
-    // Log each key separately
-    Object.entries(err.response.data).forEach(([key, value]) => {
-      console.error(`${key}:, value`);
-    });
-
-    // Return formatted error to frontend
-    return res.status(500).json({
-      error: JSON.stringify(err.response.data, null, 2),
-      message: err.response.data?.message || "ElevenLabs API error occurred."
-    });
-  } else {
-    // Handle general server errors
-    console.error("=== General Server Error ===", err.message);
-    return res.status(500).json({
-      error: err.message?.toString() || "Server error occurred."
-    });
   }
+});
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
